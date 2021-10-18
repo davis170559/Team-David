@@ -3,7 +3,12 @@ import telebot
 import time
 import pymysql
 import urllib
+import hashlib 
 
+'''
+
+
+'''
 commands = {  # command description used in the "help" command
     'start': 'Empieza a usar el bot',
     'help': 'Información de inicio',
@@ -26,13 +31,18 @@ userStep = {}  # so they won't reset every time the bot restarts
 User = os.environ['USER']
 Pass = os.environ['pass']
 
-client = pymongo.MongoClient(
-    "mongodb+srv://" + User + ":" + Pass +
-    "@clusterpepo.saoby.mongodb.net/ClusterPepo?retryWrites=true&w=majority")
-db = client.ClusterPepo
-print(db.list_collection_names())
 """
+#diccionario en el que guardaremos las opciones de los usuarios
 dicc={}  
+#diccionario para guardar los id
+id={}
+
+#diccionario para inicio de sesion
+session={}
+
+activ={}
+
+#
 API_KEY = "2034503541:AAGIeh9RmLHhJuVzwMSMk5pQ0PZMYs8OrsQ"
 bot = telebot.TeleBot(API_KEY)
 #mysql databse
@@ -48,21 +58,64 @@ class Database:
 
         self.cursor =self.connection.cursor()
 
-        print("conexion estavblecida")
-
+        print("conexion establecida")
+    #validamos el usuario
     def select_user(self,id,m) -> bool:
         sql='SELECT id_usr FROM usuarios WHERE id_usr = \''+ str(id)+'\'' 
 
         try:
             self.cursor.execute(sql)
             user = self.cursor.fetchone()
-            if(user[0]==id):
+            if(user[0]==id):                
                 return True
         except Exception as e:
             bot.send_message(m.chat.id, "No se puede autenticar en este momento, por favor contacte con el"+ 
             " administrador de este bot")
+    #validamos la contraseña
+    def pasw(self,id,pw,m)->bool:
+        
+        sql='SELECT pass FROM usuarios WHERE id_usr = \''+ str(id)+'\' and pass = \''+ str(pw)+'\''
+        print("validacion :"+pw)
+        try:
+            self.cursor.execute(sql)
+            user = self.cursor.fetchone()
+            print("Contrabd : "+str(user[0]))
+            if(user[0]==pw):
+                return True
+        except Exception as e:
+            bot.send_message(m.chat.id, "Contraseña incorrecta")    
+    #consulta de datos
+    def consulta(self,usr,app,m):
+        sql='SELECT * FROM propietario WHERE nombre = \''+ str(usr)+'\' and apellido= \''+ str(app)+'\''
 
+        try:
+            self.cursor.execute(sql)
+            users=self.cursor.fetchall()
 
+            for u in users:
+                mensaje="ID: "+str(u[0])+"\n Nombre: "+str(u[1])+"\n Apellido: "+str(u[2])+"\n RFC: "+str(u[3])
+                bot.send_message(m.chat.id, mensaje)
+                mensaje=""
+                
+        except Exception as e:
+            print("La persona con el nombre: "+str(usr)+" "+str(app)+", No existe en la base de datos")
+
+    #consultar especifico
+    # 17/10/21 MODIFICAR CONSULTA SQL, REALIZAR UN JOIN CON LAS TABLAS A LAS QUE ESTA RELACIONADO!!!     
+    def con_esp(self,id,m):
+        sql='SELECT * FROM propietario WHERE id_pro = \''+str(id)+'\''
+
+        try:
+            self.cursor.execute(sql)
+            spcu=self.cursor.fetchone()
+            
+            mensaje="ID: "+str(spcu[0])+"\n Nombre: "+str(spcu[1])+"\n Apellido: "+str(spcu[2])+"\n RFC: "+str(spcu[3])
+            bot.send_message(m.chat.id, mensaje)
+            mensaje=""
+                
+        except Exception as e:
+            print("No se pudo realizar la consulta en estos momentos, por favor contacte a su LOCAL IT")
+            
 database= Database()
 
 
@@ -94,7 +147,7 @@ def command_help(m):
     dicc[cid]=1
     print(dicc)
 
-    
+#aqui validamos la respuesta del usuario, lo realizo con banderas para ver en que accion estamos    
 @bot.message_handler(func=lambda message: True)
 def echo_message(message):
     cid = message.chat.id
@@ -105,12 +158,28 @@ def echo_message(message):
 
     print(dicc)
     print(message_text)
-
-    if dicc.get(cid) == 1:
+    activ[cid]=1
+    if dicc.get(cid) == 1 and activ[cid]==1:  
         print("autenticando")
         bot.send_message(message.chat.id, "autenticando...")
         if (database.select_user(message_text,message)):
-            bot.send_message(message.chat.id, "usuario encontrado!")
+            id[cid]=message_text
+#            bot.send_message(message.chat.id, "usuario encontrado!")
+            bot.send_message(message.chat.id, "Ingresa la contraseña")
+            dicc[cid]=2
+            activ[cid]=0
+#13.10.21            
+    #validacion de la contraseña
+    if dicc.get(cid) == 2 and activ[cid]==1:            
+        res=hashlib.sha256(message_text.encode())
+        print("contraseña: "+str(res.hexdigest()))
+        if (database.pasw(id.get(cid),res.hexdigest(),message)):
+            #si el usuario y contraseña son correctos el usuario estara logeado
+           bot.send_message(message.chat.id, "Bienvenido "+str(id.get(cid))) 
+           dicc[cid]=0
+           activ[cid]=0
+           session[cid]=1
+           
         
 
 # help page
