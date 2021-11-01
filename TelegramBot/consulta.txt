@@ -4,3 +4,33 @@ pl.motor,pl.anio,pl.marca,pl.submarca,pl.tipo,pl.clase,pl.procedencia,
 pl.combustible,pl.color,pl.uso,pl.capacidad,pl.estatus,pl.precio,pl.factura
 FROM propietario p, placa pl
 where p.id_pro=pl.id_pro;
+
+SELECT p.id_pro, p.nombre,p.apellido,p.rfc,
+pl.placa_an,pl.placa_vig,pl.mun_placa,pl.serie,
+pl.motor,pl.anio,pl.marca,pl.submarca,pl.tipo,pl.clase,pl.procedencia,
+pl.combustible,pl.color,pl.uso,pl.capacidad,pl.estatus,pl.precio,pl.factura,
+inf.calle,inf.num_calle,inf.colonia,inf.cp,inf.num_tel,inf.url_ubi
+FROM propietario p, placa pl, info_propietario inf
+where p.id_pro=pl.id_pro and p.id_pro=inf.id_pro;
+
+SELECT
+pl.placa_an,pl.placa_vig,pl.mun_placa,pl.serie,
+pl.motor,pl.anio,pl.marca,pl.submarca,pl.tipo,pl.clase,pl.procedencia,
+pl.combustible,pl.color,pl.uso,pl.capacidad,pl.estatus,pl.precio,pl.factura,
+p.id_pro, p.nombre,p.apellido,p.rfc,
+inf.calle,inf.num_calle,inf.colonia,inf.cp,inf.num_tel,inf.url_ubi
+FROM propietario p, placa pl, info_propietario inf
+where p.id_pro=pl.id_pro and p.id_pro=inf.id_pro;
+
+##### CONSULTAS POR NOMBRE######
+SELECT p.id_pro, p.nombre,p.apellido,p.rfc, ip.fecha_nac,ip.nacionalidad,ip.calle,ip.num_calle,ip.colonia,ip.estado,ip.ciudad,ip.cp,ip.num_tel,ip.genero,ip.tipo_sangre,ip.lugar_trabajo,ip.nom_contacto,ip.calle_contacto,ip.num_calleco, ip.col_con
+,ip.cp_con,ip.tel_con,ip.url_soc,ip.foto,ip.url_ubi
+FROM propietario p,info_propietario ip
+WHERE p.id_pro=ip.id_pro;
+
+
+CREATE OR REPLACE VIEW vista_prop as
+SELECT p.id_pro, p.nombre,p.apellido,p.rfc, ip.fecha_nac,ip.nacionalidad,ip.calle,ip.num_calle,ip.colonia,ip.estado,ip.ciudad,ip.cp,ip.num_tel,ip.genero,ip.tipo_sangre,ip.lugar_trabajo,ip.nom_contacto,ip.calle_contacto,ip.num_calleco, ip.col_con
+,ip.cp_con,ip.tel_con,ip.url_soc,ip.foto,ip.url_ubi
+FROM propietario p,info_propietario ip
+WHERE p.id_pro=ip.id_pro;
