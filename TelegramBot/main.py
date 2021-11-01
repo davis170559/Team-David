@@ -49,7 +49,7 @@ activ={}
 names={}
 lasname={}
 #
-API_KEY = "2034503541:AAGIeh9RmLHhJuVzwMSMk5pQ0PZMYs8OrsQ"
+API_KEY = "XXXXXXXXXXXXXXXXXXXXXXXXXX"
 bot = telebot.TeleBot(API_KEY)
 
 
@@ -81,9 +81,9 @@ class Database:
         self.connection=pymysql.connect( 
             
             host='us-cdbr-east-04.cleardb.com', #or add ip
-            user='bc931d0e0f9a13',
-            password='8e81fbda',
-            db='heroku_c58f3f7b5df6dd0'
+            user='XXXXXXXXXXXXXXXXX',
+            password='XXXXXXXXXXXXXXXXXX',
+            db='XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
         )
         
 
